@@ -1,155 +1,142 @@
-# 🛡️ Cybercrime Legal Advisor — Expert System
+# 🛡️ Cybercrime Legal Expert System
 
-> A web-based expert system that provides legal guidance on cybercrime situations under Philippine law. Built with vanilla HTML, CSS, and JavaScript as part of an Artificial Intelligence course activity on Expert Systems.
+> A browser-based expert system that identifies cybercrime situations and provides applicable Philippine law references and recommended actions.
+
+![Expert System](https://img.shields.io/badge/Expert%20System-v1.0-00e5a0?style=flat-square)
+![License](https://img.shields.io/badge/License-Academic-blue?style=flat-square)
+![Laws](https://img.shields.io/badge/Laws-RA%2010175%20%7C%20RA%209775%20%7C%20RA%2010627%20%7C%20RA%2011930-3b82f6?style=flat-square)
+![No Server](https://img.shields.io/badge/Client--Side-No%20Server%20Required-success?style=flat-square)
 
 ---
 
-## 📌 About the Project
+## 📌 Overview
 
-This system simulates a **legal expert system** focused on cybercrime. It asks the user a series of questions, evaluates their answers against a set of IF-THEN rules, and provides:
+The **Cybercrime Legal Expert System** is a rule-based AI system built for an **Expert Systems course** under an AI subject. It walks users through a 5-question diagnostic and fires matching IF-THEN rules from a Philippine cybercrime knowledge base — returning the most relevant legal classification, applicable laws, and a recommended course of action.
 
-- Identification of the likely cybercrime category
-- Applicable Philippine laws and provisions
-- Recommended legal actions and reporting steps
-- A log of which rules fired during inference
-
-> ⚠️ **Disclaimer:** This system is for **academic purposes only**. It does not constitute actual legal advice. Always consult a licensed attorney for real legal matters.
+It runs **entirely client-side** — no backend, no server, no installation required.
 
 ---
 
 ## 🖥️ Demo
 
-Open `index.html` directly in any modern browser — no server or installation required.
+```
+Open index.html → Answer 5 questions → Get legal classification + recommended action
+```
 
 ---
 
 ## 📁 Project Structure
 
 ```
-cybercrime-expert-system/
-├── index.html   # HTML structure and layout
-├── style.css    # All styles and dark theme
-├── rules.js     # Knowledge base — questions and IF-THEN rules
-├── app.js       # Inference engine and UI controller
-└── README.md    # This file
+cybercrime-legal-expert-system/
+├── index.html      # App shell and layout
+├── style.css       # Dark-themed UI styles
+├── rules.js        # Knowledge base: questions + 10 IF-THEN rules  ← load first
+├── app.js          # Inference engine and UI controller             ← load second
+└── README.md       # This file
 ```
 
 ---
 
 ## ⚙️ How It Works
 
-### Expert System Architecture
+### Inference Engine
 
-| Component | File | Description |
-|---|---|---|
-| **User Interface** | `index.html` + `style.css` | Step-by-step question flow with progress tracker |
-| **Knowledge Base** | `rules.js` | 8 IF-THEN rules + 5 questions |
-| **Inference Engine** | `app.js` | Evaluates all rules, ranks by severity |
+The system uses a **forward-chaining inference engine**:
 
-### Inference Flow
+1. User answers 5 questions covering incident type, financial loss, evidence, reporting status, and urgency.
+2. All 10 rules are evaluated simultaneously against the `answers` object.
+3. Every rule whose `match()` condition returns `true` is collected ("fired").
+4. The most severe rule becomes the **primary result** (`danger > warn > info > safe`).
+5. Remaining fired rules appear as **additional findings**.
 
-```
-User answers question
-        ↓
-Answers stored in state object
-        ↓
-All 8 rules evaluated via match(answers)
-        ↓
-Matched rules ranked by severity: danger > warn > info
-        ↓
-Primary result + additional findings displayed
-        ↓
-Rules fired shown for transparency
+### Rule Structure
+
+Each rule in `rules.js` follows this schema:
+
+```js
+{
+  id:       "R01",            // Rule identifier
+  match:    (a) => boolean,   // Condition — receives answers object
+  severity: "danger",         // danger | warn | info | safe
+  icon:     "🔴",
+  title:    "...",
+  laws:     ["RA 10175 §4(b)(8)", "..."],
+  desc:     "Plain-language explanation",
+  action:   "Recommended next steps"
+}
 ```
 
 ---
 
-## 📋 Knowledge Base — IF-THEN Rules
+## 📚 Knowledge Base — 10 Rules
 
-| Rule ID | Condition | Outcome | Applicable Law |
-|---|---|---|---|
-| R001 | Type = phishing AND financial loss = yes | Online Fraud / Phishing | RA 10175 §4(b)(8), RPC Art. 315 |
-| R002 | Type = phishing AND financial loss = no | Phishing Attempt — No Loss | RA 10175 §4(b)(8) |
-| R003 | Type = hacking | Unauthorized Access | RA 10175 §4(a)(1), §4(a)(3) |
-| R004 | Type = harassment | Online Harassment / Cyberbullying | RA 10175 §4(c)(3), RA 10627, RA 11313 |
-| R005 | Type = libel | Online Libel / Defamation | RA 10175 §4(c)(4), RPC Art. 353–355 |
-| R006 | Type = csam | Child Sexual Abuse Material | RA 9775, RA 11930, RA 7610 |
-| R007 | Evidence = none | Insufficient Evidence Warning | RA 10175 |
-| R008 | Reported = no AND urgency = critical | Unreported Active Threat | RA 10175 |
+| Rule | Trigger Condition | Severity | Applicable Law(s) |
+|------|-------------------|----------|-------------------|
+| R01  | Phishing + financial loss | 🔴 Danger | RA 10175 §4(b)(8), RPC Art. 315 |
+| R02  | Phishing, no loss | 🔵 Info | RA 10175 §4(b)(8) |
+| R03  | Unauthorized access / hacking | 🔴 Danger | RA 10175 §4(a)(1), §4(a)(3) |
+| R04  | Online harassment (non-critical) | 🟡 Warn | RA 10175 §4(c)(3), RA 10627, RA 11313 |
+| R05  | Active/critical online threat | 🔴 Danger | RA 10175 §4(c)(3), RPC Art. 282 |
+| R06  | Online libel / cyber defamation | 🟡 Warn | RA 10175 §4(c)(4), RPC Art. 353–355 |
+| R07  | Child sexual abuse material (CSAM) | 🔴 Danger | RA 9775, RA 11930, RA 7610 |
+| R08  | No evidence collected | 🟡 Warn | RA 10175 |
+| R09  | Critical incident, unreported | 🔴 Danger | RA 10175 |
+| R10  | Reported + evidence preserved | ✅ Safe | RA 10175 |
 
 ---
 
-## ⚖️ Applicable Laws
+## ⚖️ Applicable Philippine Laws
 
-| Law | Title |
-|---|---|
+| Law | Full Title |
+|-----|-----------|
 | **RA 10175** | Cybercrime Prevention Act of 2012 |
 | **RA 9775** | Anti-Child Pornography Act of 2009 |
 | **RA 10627** | Anti-Bullying Act of 2013 |
 | **RA 11313** | Safe Spaces Act (Bawal Bastos Law) |
 | **RA 11930** | Anti-OSAEC Act |
 | **RA 7610** | Special Protection of Children Against Abuse Act |
-| **RPC Art. 315** | Estafa (Fraud) |
-| **RPC Art. 353–355** | Libel |
+| **RPC Art. 315** | Estafa (Revised Penal Code) |
+| **RPC Art. 282** | Grave Threats (Revised Penal Code) |
+| **RPC Art. 353–355** | Libel (Revised Penal Code) |
 
 ---
 
 ## 🚀 Getting Started
 
-### Run Locally
+No installation or server needed.
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/cybercrime-expert-system.git
+git clone https://github.com/your-username/cybercrime-legal-expert-system.git
 
-# Navigate into the folder
-cd cybercrime-expert-system
-
-# Open in browser (no server needed)
+# Open in browser
 open index.html
+# or just double-click index.html
 ```
 
-Or simply **download the ZIP** and open `index.html` in any browser.
-
-### Requirements
-
-- Any modern browser (Chrome, Firefox, Edge, Safari)
-- No dependencies, no npm, no build tools
+> **Important:** `rules.js` must load before `app.js`. This is already configured correctly in `index.html`.
 
 ---
 
-## 🧠 Expert System Concepts Demonstrated
+## 🎨 Tech Stack
 
-- **Knowledge Base** — Structured IF-THEN rules encoding legal domain knowledge
-- **Inference Engine** — Forward chaining: evaluates all rules and fires matches
-- **Conflict Resolution** — Severity-based priority (danger > warn > info)
-- **Explanation Facility** — "Rules Fired" section shows reasoning transparency
-- **User Interface** — Step-by-step question flow with result explanation
-
----
-
-## 👥 Group Members
-
-| Name | Role |
-|---|---|
-| *(Member 1)* | Researcher — Laws and rule writing |
-| *(Member 2)* | Developer — Inference engine (app.js) |
-| *(Member 3)* | Designer — HTML/CSS interface |
-| *(Member 4)* | Tester and Presenter |
+- **HTML5** — structure
+- **CSS3** — dark UI with CSS custom properties
+- **Vanilla JavaScript** — inference engine, no frameworks
+- **Google Fonts** — Syne + DM Mono
 
 ---
 
-## 📚 References
+## ⚠️ Disclaimer
 
-- Republic Act No. 10175 — [Official Gazette](https://www.officialgazette.gov.ph/2012/09/12/republic-act-no-10175/)
-- Republic Act No. 9775 — [Chan Robles Law Library](https://www.chanrobles.com/republicactnumber9775.htm)
-- Republic Act No. 11930 — [DICT](https://dict.gov.ph)
-- NBI Cybercrime Division — [nbi.gov.ph](https://www.nbi.gov.ph)
-- PNP Anti-Cybercrime Group — [acg.pnp.gov.ph](https://acg.pnp.gov.ph)
-- National Privacy Commission — [privacy.gov.ph](https://www.privacy.gov.ph)
+This system is for **academic purposes only**.  
+It does **not** constitute actual legal advice.  
+Always consult a licensed attorney for real legal matters.
 
 ---
 
 ## 📄 License
 
-This project was created for academic purposes under the **Artificial Intelligence** course. Not intended for commercial or professional legal use.
+Academic project — Lyceum of the Philippines University (LPU Cavite)  
+College of Computer Studies · Expert Systems / AI Subject
